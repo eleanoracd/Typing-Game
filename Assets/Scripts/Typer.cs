@@ -1,65 +1,71 @@
 using UnityEngine;
 using TMPro; // Menambahkan namespace untuk TextMeshPro
 
-public class TypingGameButtonInput : MonoBehaviour
+public class Typer : MonoBehaviour
 {
-    public TextMeshProUGUI targetWordDisplay;     // Menampilkan kata target
-    public TextMeshProUGUI playerInputDisplay;    // Menampilkan input pemain
-    public TextMeshProUGUI feedbackDisplay;       // Memberi umpan balik benar atau salah
+    [SerializeField] private TextMeshProUGUI targetWordDisplay;     // target word
+    [SerializeField] private TextMeshProUGUI playerInputDisplay;    // player input
     
-    public WordList wordList;                     // Referensi ke ScriptableObject WordList
+    [SerializeField] private WordList wordList;                     // WordList reference
+    [SerializeField] private SoundManager soundManager;
+    [SerializeField] private FlashEffect flashEffect;
 
     private string currentWord;
     private string playerInput;
 
     void Start()
     {
-        // Pastikan ada WordList yang terhubung sebelum mulai
-        if (wordList == null || wordList.words.Length == 0)
+        
+        if (wordList == null || wordList.words.Count == 0)
         {
-            Debug.LogError("WordList tidak diatur atau kosong!");
+            Debug.LogError("Empty WordList!");
             return;
         }
         
         SetNewTargetWord();
     }
 
-    // Fungsi untuk memilih kata target baru secara acak dari WordList
+
     void SetNewTargetWord()
     {
-        currentWord = wordList.words[Random.Range(0, wordList.words.Length)];
+        currentWord = wordList.words[Random.Range(0, wordList.words.Count)];
         targetWordDisplay.text = currentWord;
-        playerInput = ""; // Mengosongkan input pemain
+        playerInput = "";
         playerInputDisplay.text = playerInput;
     }
 
-    // Fungsi yang dipanggil ketika tombol ditekan
+
     public void AddLetter(string letter)
     {
         playerInput += letter;
         playerInputDisplay.text = playerInput;
 
-        // Jika input pemain sudah sepanjang kata target, cek apakah cocok
+ 
         if (playerInput.Length == currentWord.Length)
         {
             CheckWord();
         }
     }
 
-    // Fungsi untuk mengecek apakah input sama dengan kata target
+
     void CheckWord()
     {
-        if (playerInput.Equals(currentWord, System.StringComparison.OrdinalIgnoreCase))
+        bool isCorrect = playerInput.Equals(currentWord, System.StringComparison.OrdinalIgnoreCase);
+
+        if (isCorrect)
         {
-            feedbackDisplay.text = "Benar!";
-            SetNewTargetWord(); // Ganti kata target setelah input benar
+            soundManager.PlayCorrectSFX();
+            wordList.words.Remove(currentWord);
         }
         else
         {
-            feedbackDisplay.text = "Salah, coba lagi!";
+            soundManager.PlayIncorrectSFX();
         }
 
-        playerInput = ""; // Mengosongkan input pemain setelah pengecekan
+        flashEffect.PlayFlash(isCorrect);
+
+        SetNewTargetWord();
+        playerInput = "";
         playerInputDisplay.text = playerInput;
     }
 }

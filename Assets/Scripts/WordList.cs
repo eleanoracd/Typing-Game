@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "WordList", menuName = "TypingGame/WordList")]
+[CreateAssetMenu(fileName = "WordList", menuName = "ScriptableObjects/WordList", order = 1)]
 public class WordList : ScriptableObject
 {
-    public string[] words;
+    public List<string> words = new List<string>();
 }
